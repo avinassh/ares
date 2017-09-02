@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/nlopes/slack"
+	"log"
 )
 
 type Ares struct {
@@ -20,7 +21,13 @@ func (a *Ares) deleteFile(fileId string) {
 }
 
 func (a *Ares) handleFile(file *slack.File) {
-	uploadToImgur(file.URLPrivateDownload, a.SlackAppToken, a.ImgurClientID)
+	resp := uploadToImgur(file.URLPrivateDownload, a.SlackAppToken, a.ImgurClientID)
+
+	if resp.Status != 200 {
+		log.Println("Failed to download/upload")
+		return
+	}
+
 	a.deleteFile(file.ID)
 }
 

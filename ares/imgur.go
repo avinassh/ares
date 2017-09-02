@@ -17,7 +17,8 @@ type ImgurResponse struct {
 	Status  int  `json:"status"`
 }
 
-func uploadToImgur(fileURL, slackAccessToken, imgurClientID string) {
+func uploadToImgur(fileURL, slackAccessToken, imgurClientID string) *ImgurResponse {
+	var result *ImgurResponse
 	req, err := http.NewRequest("GET", fileURL, nil)
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", slackAccessToken))
 	client := &http.Client{
@@ -25,37 +26,34 @@ func uploadToImgur(fileURL, slackAccessToken, imgurClientID string) {
 	}
 	resp, err := client.Do(req)
 	if err != nil {
-		log.Fatal("Failed to connect to Slack", err.Error())
+		log.Fatal("Failed to download file from Slack", err.Error())
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != 200 {
 		// not a valid response
-		log.Println(resp.StatusCode)
-		return
+		log.Println("Failed to download file from Slack:", resp.StatusCode)
+		return result
 	}
 
-	iurl := "https://api.imgur.com/3/image"
+	imgURL := "https://api.imgur.com/3/image"
 
-	ireq, err := http.NewRequest("POST", iurl, resp.Body)
-	ireq.Header.Set("Authorization", fmt.Sprintf("Client-ID %s", imgurClientID))
+	imgReq, err := http.NewRequest("POST", imgURL, resp.Body)
+	imgReq.Header.Set("Authorization", fmt.Sprintf("Client-ID %s", imgurClientID))
 
-	iresp, err := client.Do(ireq)
+	imgResp, err := client.Do(imgReq)
 
 	if err != nil {
 		log.Fatal("Failed to connect to Imgur", err.Error())
 	}
-	defer iresp.Body.Close()
-	if iresp.StatusCode != 200 {
+	defer imgResp.Body.Close()
+	if imgResp.StatusCode != 200 {
 		// not a valid response
-		log.Println(resp.StatusCode)
-		return
+		log.Fatal("Received a non-200 status while uploading to Imgur", resp.StatusCode)
 	}
 
-	var result ImgurResponse
-	if err = json.NewDecoder(iresp.Body).Decode(&result); err != nil {
+	if err = json.NewDecoder(imgResp.Body).Decode(result); err != nil {
 		log.Fatal("Failed to decode response from Chat API", err.Error())
 	}
 
-	log.Println(result.Data.Link, result.Data.Deletehash)
-
+	return result
 }
