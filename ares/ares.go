@@ -45,7 +45,7 @@ func (a *Ares) sendImgToSlack(channel, user, url string) {
 	api := slack.New(a.SlackBotToken)
 	params := slack.PostMessageParameters{}
 	attachment := slack.Attachment{
-		Color:    "good",
+		Color:    "#D3D3D3",
 		Text:     fmt.Sprintf("image originally uploaded by <@%s>", user),
 		ImageURL: url,
 	}
