@@ -2,6 +2,9 @@
 	"ImportPath": "github.com/avinassh/ares",
 	"GoVersion": "go1.8",
 	"GodepVersion": "v79",
+	"Packages": [
+		"./..."
+	],
 	"Deps": [
 		{
 			"ImportPath": "github.com/nlopes/slack",
