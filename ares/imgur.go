@@ -1,4 +1,4 @@
-package main
+package ares
 
 import (
 	"encoding/json"
