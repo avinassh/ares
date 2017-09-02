@@ -2,21 +2,26 @@ package ares
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/nlopes/slack"
 )
 
-func deleteFile(fileId string) {
-	api := slack.New(os.Getenv("APP_TOKEN"))
+type Ares struct {
+	SlackAppToken string
+	SlackBotToken string
+	ImgurClientID string
+}
+
+func (a *Ares) deleteFile(fileId string) {
+	api := slack.New(a.SlackAppToken)
 	if err := api.DeleteFile(fileId); err != nil {
 		fmt.Println("Deletion of the file failed:", err.Error())
 	}
 }
 
-func handleFile(file *slack.File) {
-	uploadToImgur(file.URLPrivateDownload, os.Getenv("APP_TOKEN"))
-	deleteFile(file.ID)
+func (a *Ares) handleFile(file *slack.File) {
+	uploadToImgur(file.URLPrivateDownload, a.SlackAppToken, a.ImgurClientID)
+	a.deleteFile(file.ID)
 }
 
 func isImageFile(fileType string) bool {
@@ -28,8 +33,8 @@ func isImageFile(fileType string) bool {
 	return false
 }
 
-func Run() {
-	api := slack.New(os.Getenv("BOT_TOKEN"))
+func (a *Ares) Run() {
+	api := slack.New(a.SlackBotToken)
 
 	rtm := api.NewRTM()
 	go rtm.ManageConnection()
@@ -40,7 +45,7 @@ func Run() {
 		case *slack.MessageEvent:
 			if ev.SubType == "file_share" {
 				if isImageFile(ev.File.Filetype) {
-					handleFile(ev.File)
+					a.handleFile(ev.File)
 				}
 			}
 

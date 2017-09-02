@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"os"
 	"time"
 )
 
@@ -18,9 +17,7 @@ type ImgurResponse struct {
 	Status  int  `json:"status"`
 }
 
-func uploadToImgur(fileURL, slackAccessToken string) {
-	clientID := os.Getenv("IMGUR_CLIENT_ID")
-
+func uploadToImgur(fileURL, slackAccessToken, imgurClientID string) {
 	req, err := http.NewRequest("GET", fileURL, nil)
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", slackAccessToken))
 	client := &http.Client{
@@ -40,7 +37,7 @@ func uploadToImgur(fileURL, slackAccessToken string) {
 	iurl := "https://api.imgur.com/3/image"
 
 	ireq, err := http.NewRequest("POST", iurl, resp.Body)
-	ireq.Header.Set("Authorization", fmt.Sprintf("Client-ID %s", clientID))
+	ireq.Header.Set("Authorization", fmt.Sprintf("Client-ID %s", imgurClientID))
 
 	iresp, err := client.Do(ireq)
 

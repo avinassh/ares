@@ -1,7 +1,16 @@
 package main
 
-import "github.com/avinassh/ares/ares"
+import (
+	"os"
+
+	"github.com/avinassh/ares/ares"
+)
 
 func main() {
-	ares.Run()
+	a := ares.Ares{
+		SlackBotToken: os.Getenv("BOT_TOKEN"),
+		SlackAppToken: os.Getenv("APP_TOKEN"),
+		ImgurClientID: os.Getenv("IMGUR_CLIENT_ID"),
+	}
+	a.Run()
 }
