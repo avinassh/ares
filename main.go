@@ -14,6 +14,20 @@ func deleteFile(fileId string) {
 	}
 }
 
+func handleFile(file *slack.File) {
+	uploadToImgur(file.URLPrivateDownload, os.Getenv("APP_TOKEN"))
+	deleteFile(file.ID)
+}
+
+func isImageFile(fileType string) bool {
+	for _, fType := range []string{"jpg", "jpeg", "png", "gif"} {
+		if fType == fileType {
+			return true
+		}
+	}
+	return false
+}
+
 func main() {
 	api := slack.New(os.Getenv("BOT_TOKEN"))
 
@@ -25,7 +39,9 @@ func main() {
 
 		case *slack.MessageEvent:
 			if ev.SubType == "file_share" {
-				go deleteFile(ev.File.ID)
+				if isImageFile(ev.File.Filetype) {
+					handleFile(ev.File)
+				}
 			}
 
 		case *slack.RTMError:
