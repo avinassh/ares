@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	"github.com/avinassh/ares/ares"
+	"github.com/avinassh/ares/core"
 )
 
 func main() {

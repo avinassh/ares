@@ -1,0 +1,20 @@
+{
+  "name": "ares",
+  "description": "A slack moderator written using Golang",
+  "repository": "https://github.com/avinassh/ares",
+  "keywords": ["slack", "golang", "bot"],
+  "env": {
+    "APP_TOKEN": {
+      "description": "Slack app token",
+      "required": true
+    },
+    "BOT_TOKEN": {
+      "description": "Slack bot token",
+      "required": true
+    },
+    "IMGUR_CLIENT_ID": {
+      "description": "Imgur client ID",
+      "required": true
+    }
+  }
+}
