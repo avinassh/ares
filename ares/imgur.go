@@ -51,8 +51,8 @@ func uploadToImgur(fileURL, slackAccessToken, imgurClientID string) *ImgurRespon
 		log.Fatal("Received a non-200 status while uploading to Imgur", resp.StatusCode)
 	}
 
-	if err = json.NewDecoder(imgResp.Body).Decode(result); err != nil {
-		log.Fatal("Failed to decode response from Chat API", err.Error())
+	if err = json.NewDecoder(imgResp.Body).Decode(&result); err != nil {
+		log.Fatal("Failed to decode response from Imgur API", err.Error())
 	}
 
 	return result
