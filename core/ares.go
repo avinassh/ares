@@ -161,6 +161,14 @@ func (a *Ares) Run() {
 				}
 			}
 
+		case *slack.GroupLeftEvent:
+			log.Println("Bot was removed from private channel: ", ev.Channel)
+			a.addBotGroup(ev.Channel)
+
+		case *slack.ChannelLeftEvent:
+			log.Println("Bot was removed from public channel: ", ev.Channel)
+			a.addBotChannel(ev.Channel)
+
 		case *slack.RTMError:
 			fmt.Printf("Error: %s\n", ev.Error())
 
