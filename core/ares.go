@@ -2,22 +2,75 @@ package ares
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/nlopes/slack"
-	"log"
 )
 
 type Ares struct {
 	SlackAppToken string
 	SlackBotToken string
+	SlackAppID    string
 	ImgurClientID string
+	BotUserID     string
+	// Bot won't be added or re-added to these channels
+	ManagedChannels []string
+}
+
+func (a *Ares) initBot() {
+	api := slack.New(a.SlackAppToken)
+	a.getBotUserID()
+
+	channels, err := api.GetChannels(true)
+
+	if err != nil {
+		log.Fatal("Failed to get public channels list: ", err.Error())
+	}
+
+	for _, channel := range channels {
+		a.addBotChannel(channel.ID, a.BotUserID)
+	}
+
+}
+
+func (a *Ares) getBotUserID() {
+	api := slack.New(a.SlackAppToken)
+	users, err := api.GetUsers()
+
+	if err != nil {
+		log.Fatal("Failed to fetch slack users info", err.Error())
+	}
+
+	for _, user := range users {
+
+		if user.Profile.ApiAppID == a.SlackAppID {
+			a.BotUserID = user.ID
+			return
+		}
+	}
+	log.Fatal("Unable to find bot user on the Slack")
 }
 
 func (a *Ares) deleteFile(fileId string) {
 	api := slack.New(a.SlackAppToken)
+
 	if err := api.DeleteFile(fileId); err != nil {
 		fmt.Println("Deletion of the file failed:", err.Error())
 	}
+}
+
+func (a *Ares) addBotChannel(channelID, user string) {
+	api := slack.New(a.SlackAppToken)
+	if channel, err := api.InviteUserToChannel(channelID, user); err != nil {
+		log.Println(fmt.Sprintf("Failed to add bot to %s: %s", channel, err.Error()))
+	}
+}
+
+func (a *Ares) addBotGroup(group, user string) {
+	api := slack.New(a.SlackAppToken)
+	grp, resp, err := api.InviteUserToGroup(group, user)
+
+	log.Println(grp, resp, err)
 }
 
 func (a *Ares) notifyUser(user, deleteHash string) {
@@ -80,6 +133,8 @@ func isImageFile(fileType string) bool {
 
 func (a *Ares) Run() {
 	api := slack.New(a.SlackBotToken)
+
+	a.initBot()
 
 	rtm := api.NewRTM()
 	go rtm.ManageConnection()
