@@ -15,11 +15,13 @@ type Ares struct {
 	BotUserID     string
 	// Bot won't be added or re-added to these channels
 	ManagedChannels []string
+	// list of userIDs of admins
+	Admins []string
 }
 
 func (a *Ares) initBot() {
 	api := slack.New(a.SlackAppToken)
-	a.getBotUserID()
+	a.getBotandAdmin()
 
 	channels, err := api.GetChannels(true)
 
@@ -42,7 +44,8 @@ func (a *Ares) initBot() {
 	}
 }
 
-func (a *Ares) getBotUserID() {
+// Fetches the bot user ID and also saves the admin user ids
+func (a *Ares) getBotandAdmin() {
 	api := slack.New(a.SlackAppToken)
 	users, err := api.GetUsers()
 
@@ -54,10 +57,16 @@ func (a *Ares) getBotUserID() {
 
 		if user.Profile.ApiAppID == a.SlackAppID {
 			a.BotUserID = user.ID
-			return
+		}
+
+		if user.IsAdmin {
+			a.Admins = append(a.Admins, user.ID)
 		}
 	}
-	log.Fatal("Unable to find bot user on the Slack")
+
+	if a.BotUserID == "" {
+		log.Fatal("Unable to find bot user on the Slack")
+	}
 }
 
 func (a *Ares) deleteFile(fileId string) {
@@ -166,6 +175,11 @@ func (a *Ares) Run() {
 				if isImageFile(ev.File.Filetype) {
 					a.handleFile(ev.File, ev.Channel)
 				}
+			}
+
+		case *slack.TeamJoinEvent:
+			if !ev.User.IsBot {
+				a.onBoardUser(ev.User)
 			}
 
 		case *slack.GroupLeftEvent:
