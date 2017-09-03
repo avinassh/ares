@@ -105,13 +105,19 @@ func (a *Ares) notifyUser(user, deleteHash string) {
 	}
 }
 
-func (a *Ares) sendImgToSlack(channel, user, url string) {
+func (a *Ares) sendImgToSlack(channel, user, url, commentText string) {
 	api := slack.New(a.SlackBotToken)
 	params := slack.PostMessageParameters{}
 	attachment := slack.Attachment{
 		Color:    "#D3D3D3",
 		Text:     fmt.Sprintf("image originally uploaded by <@%s>", user),
 		ImageURL: url,
+		Fields: []slack.AttachmentField{
+			{
+				Title: "",
+				Value: commentText,
+			},
+		},
 	}
 	params.Attachments = []slack.Attachment{attachment}
 	_, _, err := api.PostMessage(channel, "", params)
@@ -121,15 +127,16 @@ func (a *Ares) sendImgToSlack(channel, user, url string) {
 }
 
 func (a *Ares) handleFile(file *slack.File, channel string) {
-	resp := uploadToImgur(file.URLPrivateDownload, a.SlackAppToken, a.ImgurClientID)
+	commentText := file.InitialComment.Comment
 
+	resp := uploadToImgur(file.URLPrivateDownload, a.SlackAppToken, a.ImgurClientID)
 	if resp.Status != 200 {
 		log.Println("Failed to download/upload")
 		return
 	}
 
 	a.notifyUser(file.User, resp.Data.Deletehash)
-	a.sendImgToSlack(channel, file.User, resp.Data.Link)
+	a.sendImgToSlack(channel, file.User, resp.Data.Link, commentText)
 	a.deleteFile(file.ID)
 }
 
