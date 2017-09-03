@@ -28,7 +28,7 @@ func (a *Ares) initBot() {
 	}
 
 	for _, channel := range channels {
-		a.addBotChannel(channel.ID, a.BotUserID)
+		a.addBotChannel(channel.ID)
 	}
 
 	groups, err := api.GetGroups(true)
@@ -38,7 +38,7 @@ func (a *Ares) initBot() {
 	}
 
 	for _, group := range groups {
-		a.addBotGroup(group.ID, a.BotUserID)
+		a.addBotGroup(group.ID)
 	}
 }
 
@@ -68,18 +68,18 @@ func (a *Ares) deleteFile(fileId string) {
 	}
 }
 
-func (a *Ares) addBotChannel(channelID, user string) {
+func (a *Ares) addBotChannel(channelID string) {
 	api := slack.New(a.SlackAppToken)
-	if _, err := api.InviteUserToChannel(channelID, user); err != nil {
+	if _, err := api.InviteUserToChannel(channelID, a.BotUserID); err != nil {
 		if err.Error() != "already_in_channel" {
 			log.Println(fmt.Sprintf("Failed to add bot to %s: %s", channelID, err.Error()))
 		}
 	}
 }
 
-func (a *Ares) addBotGroup(group, user string) {
+func (a *Ares) addBotGroup(group string) {
 	api := slack.New(a.SlackAppToken)
-	if _, _, err := api.InviteUserToGroup(group, user); err != nil {
+	if _, _, err := api.InviteUserToGroup(group, a.BotUserID); err != nil {
 		log.Println(fmt.Sprintf("Failed to add bot to %s: %s", group, err.Error()))
 	}
 }
