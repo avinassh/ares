@@ -31,6 +31,15 @@ func (a *Ares) initBot() {
 		a.addBotChannel(channel.ID, a.BotUserID)
 	}
 
+	groups, err := api.GetGroups(true)
+
+	if err != nil {
+		log.Fatal("Failed to get private channels list: ", err.Error())
+	}
+
+	for _, group := range groups {
+		a.addBotGroup(group.ID, a.BotUserID)
+	}
 }
 
 func (a *Ares) getBotUserID() {
@@ -61,16 +70,18 @@ func (a *Ares) deleteFile(fileId string) {
 
 func (a *Ares) addBotChannel(channelID, user string) {
 	api := slack.New(a.SlackAppToken)
-	if channel, err := api.InviteUserToChannel(channelID, user); err != nil {
-		log.Println(fmt.Sprintf("Failed to add bot to %s: %s", channel, err.Error()))
+	if _, err := api.InviteUserToChannel(channelID, user); err != nil {
+		if err.Error() != "already_in_channel" {
+			log.Println(fmt.Sprintf("Failed to add bot to %s: %s", channelID, err.Error()))
+		}
 	}
 }
 
 func (a *Ares) addBotGroup(group, user string) {
 	api := slack.New(a.SlackAppToken)
-	grp, resp, err := api.InviteUserToGroup(group, user)
-
-	log.Println(grp, resp, err)
+	if _, _, err := api.InviteUserToGroup(group, user); err != nil {
+		log.Println(fmt.Sprintf("Failed to add bot to %s: %s", group, err.Error()))
+	}
 }
 
 func (a *Ares) notifyUser(user, deleteHash string) {
@@ -135,6 +146,7 @@ func (a *Ares) Run() {
 	api := slack.New(a.SlackBotToken)
 
 	a.initBot()
+	log.Println("Bot initialized. Starting moderation duty.")
 
 	rtm := api.NewRTM()
 	go rtm.ManageConnection()
