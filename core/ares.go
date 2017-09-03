@@ -2,21 +2,85 @@ package ares
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/nlopes/slack"
-	"log"
 )
 
 type Ares struct {
 	SlackAppToken string
 	SlackBotToken string
+	SlackAppID    string
 	ImgurClientID string
+	BotUserID     string
+	// Bot won't be added or re-added to these channels
+	ManagedChannels []string
+}
+
+func (a *Ares) initBot() {
+	api := slack.New(a.SlackAppToken)
+	a.getBotUserID()
+
+	channels, err := api.GetChannels(true)
+
+	if err != nil {
+		log.Fatal("Failed to get public channels list: ", err.Error())
+	}
+
+	for _, channel := range channels {
+		a.addBotChannel(channel.ID)
+	}
+
+	groups, err := api.GetGroups(true)
+
+	if err != nil {
+		log.Fatal("Failed to get private channels list: ", err.Error())
+	}
+
+	for _, group := range groups {
+		a.addBotGroup(group.ID)
+	}
+}
+
+func (a *Ares) getBotUserID() {
+	api := slack.New(a.SlackAppToken)
+	users, err := api.GetUsers()
+
+	if err != nil {
+		log.Fatal("Failed to fetch slack users info", err.Error())
+	}
+
+	for _, user := range users {
+
+		if user.Profile.ApiAppID == a.SlackAppID {
+			a.BotUserID = user.ID
+			return
+		}
+	}
+	log.Fatal("Unable to find bot user on the Slack")
 }
 
 func (a *Ares) deleteFile(fileId string) {
 	api := slack.New(a.SlackAppToken)
+
 	if err := api.DeleteFile(fileId); err != nil {
 		fmt.Println("Deletion of the file failed:", err.Error())
+	}
+}
+
+func (a *Ares) addBotChannel(channelID string) {
+	api := slack.New(a.SlackAppToken)
+	if _, err := api.InviteUserToChannel(channelID, a.BotUserID); err != nil {
+		if err.Error() != "already_in_channel" {
+			log.Println(fmt.Sprintf("Failed to add bot to %s: %s", channelID, err.Error()))
+		}
+	}
+}
+
+func (a *Ares) addBotGroup(group string) {
+	api := slack.New(a.SlackAppToken)
+	if _, _, err := api.InviteUserToGroup(group, a.BotUserID); err != nil {
+		log.Println(fmt.Sprintf("Failed to add bot to %s: %s", group, err.Error()))
 	}
 }
 
@@ -81,6 +145,9 @@ func isImageFile(fileType string) bool {
 func (a *Ares) Run() {
 	api := slack.New(a.SlackBotToken)
 
+	a.initBot()
+	log.Println("Bot initialized. Starting moderation duty.")
+
 	rtm := api.NewRTM()
 	go rtm.ManageConnection()
 
@@ -93,6 +160,14 @@ func (a *Ares) Run() {
 					a.handleFile(ev.File, ev.Channel)
 				}
 			}
+
+		case *slack.GroupLeftEvent:
+			log.Println("Bot was removed from private channel: ", ev.Channel)
+			a.addBotGroup(ev.Channel)
+
+		case *slack.ChannelLeftEvent:
+			log.Println("Bot was removed from public channel: ", ev.Channel)
+			a.addBotChannel(ev.Channel)
 
 		case *slack.RTMError:
 			fmt.Printf("Error: %s\n", ev.Error())

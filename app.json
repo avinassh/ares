@@ -12,6 +12,10 @@
       "description": "Slack bot token",
       "required": true
     },
+    "APP_ID": {
+      "description": "Slack App ID",
+      "required": true
+    },
     "IMGUR_CLIENT_ID": {
       "description": "Imgur client ID",
       "required": true
