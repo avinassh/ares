@@ -17,6 +17,10 @@ type Ares struct {
 	ManagedChannels []string
 	// list of userIDs of admins
 	Admins []string
+	// maintain a user dict
+	Users map[string]string
+	// Muted users list
+	MutedUsers map[string]bool
 }
 
 func (a *Ares) initBot() {
@@ -53,6 +57,9 @@ func (a *Ares) getBotandAdmin() {
 		log.Fatal("Failed to fetch slack users info", err.Error())
 	}
 
+	a.Users = make(map[string]string)
+	a.MutedUsers = make(map[string]bool)
+
 	for _, user := range users {
 
 		if user.Profile.ApiAppID == a.SlackAppID {
@@ -61,11 +68,21 @@ func (a *Ares) getBotandAdmin() {
 
 		if user.IsAdmin {
 			a.Admins = append(a.Admins, user.ID)
+		} else {
+			a.Users[user.Name] = user.ID
 		}
 	}
 
 	if a.BotUserID == "" {
 		log.Fatal("Unable to find bot user on the Slack")
+	}
+}
+
+func (a *Ares) deleteMsg(channel, msgTimestamp string) {
+	api := slack.New(a.SlackAppToken)
+
+	if _, _, err := api.DeleteMessage(channel, msgTimestamp); err != nil {
+		log.Println("Failed to delete msg: ", err.Error())
 	}
 }
 
@@ -171,6 +188,13 @@ func (a *Ares) Run() {
 		switch ev := msg.Data.(type) {
 
 		case *slack.MessageEvent:
+
+			if a.isAdminUser(ev.Msg.User) {
+				a.performMuteAction(ev.Msg.Text)
+			} else if a.isMuted(ev.Msg.User) {
+				go a.deleteMsg(ev.Msg.Channel, ev.Msg.Timestamp)
+			}
+
 			if ev.SubType == "file_share" {
 				if isImageFile(ev.File.Filetype) {
 					a.handleFile(ev.File, ev.Channel)
