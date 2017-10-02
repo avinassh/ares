@@ -22,7 +22,7 @@ func uploadToImgur(fileURL, slackAccessToken, imgurClientID string) *ImgurRespon
 	req, err := http.NewRequest("GET", fileURL, nil)
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", slackAccessToken))
 	client := &http.Client{
-		Timeout: 60 * time.Second,
+		Timeout: 3 * time.Minute,
 	}
 	resp, err := client.Do(req)
 	if err != nil {
