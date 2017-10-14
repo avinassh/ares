@@ -48,7 +48,7 @@ func uploadToImgur(fileURL, slackAccessToken, imgurClientID string) *ImgurRespon
 	defer imgResp.Body.Close()
 	if imgResp.StatusCode != 200 {
 		// not a valid response
-		log.Fatal("Received a non-200 status while uploading to Imgur", resp.StatusCode)
+		log.Fatal("Received a non-200 status while uploading to Imgur", imgResp.StatusCode)
 	}
 
 	if err = json.NewDecoder(imgResp.Body).Decode(&result); err != nil {
