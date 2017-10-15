@@ -11,6 +11,7 @@ A Moderator for Slack.
 
 - Adds the bot to all channels at initialization 
 - Deletes uploaded images and reuploads them to Imgur
+- Mutes an user (type in `ares mute <username>`)
 
 ## License
 
