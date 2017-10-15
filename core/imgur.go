@@ -1,8 +1,10 @@
 package ares
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"time"
@@ -34,10 +36,10 @@ func uploadToImgur(fileURL, slackAccessToken, imgurClientID string) *ImgurRespon
 		log.Println("Failed to download file from Slack:", resp.StatusCode)
 		return result
 	}
-
+	imgBody, err := ioutil.ReadAll(resp.Body)
 	imgURL := "https://api.imgur.com/3/image"
 
-	imgReq, err := http.NewRequest("POST", imgURL, resp.Body)
+	imgReq, err := http.NewRequest("POST", imgURL, bytes.NewBuffer(imgBody))
 	imgReq.Header.Set("Authorization", fmt.Sprintf("Client-ID %s", imgurClientID))
 
 	imgResp, err := client.Do(imgReq)
