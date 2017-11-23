@@ -39,8 +39,7 @@ type UploadResponse struct {
 }
 
 func uploadToImgur(fileURL, slackAccessToken, imgurClientID string) *UploadResponse {
-
-	var result *UploadResponse
+	result := &UploadResponse{}
 	req, err := http.NewRequest("GET", fileURL, nil)
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", slackAccessToken))
 	client := &http.Client{
