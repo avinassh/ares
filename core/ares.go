@@ -157,7 +157,8 @@ func (a *Ares) handleFile(file *slack.File, channel string) {
 
 	resp := uploadToImgur(file.URLPrivateDownload, a.SlackAppToken, a.ImgurClientID)
 	if resp.Status == false {
-		log.Println("Failed to download/upload")
+		log.Println("Failed to download/upload: ", file)
+		log.Println("Download url: ", file.URLPrivateDownload)
 		return
 	}
 
