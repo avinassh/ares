@@ -110,7 +110,7 @@ func (a *Ares) addBotGroup(group string) {
 	}
 }
 
-func (a *Ares) notifyUser(user, deleteHash string) {
+func (a *Ares) notifyUser(user, deleteLink string) {
 	api := slack.New(a.SlackBotToken)
 	params := slack.PostMessageParameters{}
 	attachment := slack.Attachment{
@@ -120,7 +120,7 @@ func (a *Ares) notifyUser(user, deleteHash string) {
 		Fields: []slack.AttachmentField{
 			{
 				Title: "If you wish to delete the image uploaded, click on the following link",
-				Value: fmt.Sprintf("https://imgur.com/delete/%s", deleteHash),
+				Value: deleteLink,
 			},
 		},
 	}
@@ -156,13 +156,13 @@ func (a *Ares) handleFile(file *slack.File, channel string) {
 	commentText := file.InitialComment.Comment
 
 	resp := uploadToImgur(file.URLPrivateDownload, a.SlackAppToken, a.ImgurClientID)
-	if resp.Status != 200 {
+	if resp.Status == false {
 		log.Println("Failed to download/upload")
 		return
 	}
 
-	a.notifyUser(file.User, resp.Data.Deletehash)
-	a.sendImgToSlack(channel, file.User, resp.Data.Link, commentText)
+	a.notifyUser(file.User, resp.DeleteLink)
+	a.sendImgToSlack(channel, file.User, resp.Link, commentText)
 	a.deleteFile(file.ID)
 }
 
