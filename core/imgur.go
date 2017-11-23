@@ -78,8 +78,8 @@ func uploadToImgur(fileURL, slackAccessToken, imgurClientID string) *UploadRespo
 
 	}
 	log.Println("Received a non-200 status while uploading to Imgur: ", imgResp.StatusCode)
-	imgRespBody, _ := ioutil.ReadAll(imgResp.Body)
-	log.Println("Imgur resp body for fail:", string(imgRespBody))
+	// imgRespBody, _ := ioutil.ReadAll(imgResp.Body)
+	// log.Println("Imgur resp body for fail:", string(imgRespBody))
 	// trying vgy
 	vgyURL := "https://vgy.me/upload"
 	var b bytes.Buffer
@@ -95,8 +95,8 @@ func uploadToImgur(fileURL, slackAccessToken, imgurClientID string) *UploadRespo
 	defer vgResp.Body.Close()
 	if vgResp.StatusCode != 200 {
 		log.Println("Received a non-200 status while uploading to Vgy: ", vgResp.StatusCode)
-		vgRespBody, _ := ioutil.ReadAll(vgResp.Body)
-		log.Println("Vgy resp body for fail:", string(vgRespBody))
+		// vgRespBody, _ := ioutil.ReadAll(vgResp.Body)
+		// log.Println("Vgy resp body for fail:", string(vgRespBody))
 		return result
 	}
 	var vgResult *VgyResponse
