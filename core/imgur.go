@@ -48,7 +48,9 @@ func uploadToImgur(fileURL, slackAccessToken, imgurClientID string) *UploadRespo
 	}
 	resp, err := client.Do(req)
 	if err != nil {
-		log.Fatal("Failed to download file from Slack", err.Error())
+		log.Println("Failed to download file from Slack: ", err.Error())
+		log.Println("File url: ", fileURL)
+		return result
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != 200 {
