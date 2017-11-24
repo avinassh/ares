@@ -39,12 +39,17 @@ type UploadResponse struct {
 }
 
 func uploadToImgur(fileURL, slackAccessToken, imgurClientID string) *UploadResponse {
+	// CAUTION: REALLY BAD CODE!
 	result := &UploadResponse{}
-	req, err := http.NewRequest("GET", fileURL, nil)
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", slackAccessToken))
 	client := &http.Client{
 		Timeout: 3 * time.Minute,
 	}
+	count := 0
+
+retryLabel:
+
+	req, err := http.NewRequest("GET", fileURL, nil)
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", slackAccessToken))
 	resp, err := client.Do(req)
 	if err != nil {
 		log.Println("Failed to download file from Slack: ", err.Error())
@@ -73,11 +78,12 @@ func uploadToImgur(fileURL, slackAccessToken, imgurClientID string) *UploadRespo
 		var imgurResponse *ImgurResponse
 		if err = json.NewDecoder(imgResp.Body).Decode(&imgurResponse); err != nil {
 			log.Println("Failed to decode response from Imgur API: ", err.Error())
+			return result
 		}
 		return formatImgurResponse(imgurResponse)
 
 	}
-	log.Println("Received a non-200 status while uploading to Imgur: ", imgResp.StatusCode)
+	// log.Println("Received a non-200 status while uploading to Imgur: ", imgResp.StatusCode)
 	// imgRespBody, _ := ioutil.ReadAll(imgResp.Body)
 	// log.Println("Imgur resp body for fail:", string(imgRespBody))
 	// trying vgy
@@ -94,6 +100,11 @@ func uploadToImgur(fileURL, slackAccessToken, imgurClientID string) *UploadRespo
 	vgResp, err := client.Do(imgReq)
 	defer vgResp.Body.Close()
 	if vgResp.StatusCode != 200 {
+		count = count + 1
+		if count < 3 {
+			log.Printf("count: %d for %s\n", count, fileURL)
+			goto retryLabel
+		}
 		log.Println("Received a non-200 status while uploading to Vgy: ", vgResp.StatusCode)
 		// vgRespBody, _ := ioutil.ReadAll(vgResp.Body)
 		// log.Println("Vgy resp body for fail:", string(vgRespBody))
