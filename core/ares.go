@@ -198,7 +198,8 @@ func (a *Ares) Run() {
 
 			if ev.SubType == "file_share" {
 				if isImageFile(ev.File.Filetype) {
-					a.handleFile(ev.File, ev.Channel)
+					// TODO: Use worker pool
+					go a.handleFile(ev.File, ev.Channel)
 				}
 			}
 
