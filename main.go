@@ -2,9 +2,9 @@ package main
 
 import (
 	"os"
+	"strings"
 
 	"github.com/avinassh/ares/core"
-	"strings"
 )
 
 func main() {
