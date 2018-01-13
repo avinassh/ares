@@ -16,6 +16,10 @@
       "description": "Slack App ID",
       "required": true
     },
+    "MOD_IDS": {
+      "description": "Comma separated User ids",
+      "required": false
+    },
     "IMGUR_CLIENT_ID": {
       "description": "Imgur client ID",
       "required": true
