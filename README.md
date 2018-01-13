@@ -16,7 +16,7 @@ A Moderator for Slack.
 
 ### Moderators
 
-Ares can make some members as moderators. To add moderators, make sure you have set `MOD_IDS` env variable with the comma separated user ids of the mods, like `U1AQSSBSA, U0CM1JMV5, U0SDDB26B`
+Ares can make some members as moderators. To add moderators, make sure you have set `MOD_IDS` env variable with the comma separated user ids of the mods, like `U1AQSSBSA,U0CM1JMV5,U0SDDB26B`
 
 Currently, moderators can remove or mute other users.
 
