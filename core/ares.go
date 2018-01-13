@@ -17,6 +17,8 @@ type Ares struct {
 	ManagedChannels []string
 	// list of userIDs of admins
 	Admins []string
+	// list of userIDs of moderators
+	Moderators []string
 	// maintain a user dict
 	Users map[string]string
 	// Muted users list
@@ -190,8 +192,9 @@ func (a *Ares) Run() {
 
 		case *slack.MessageEvent:
 
-			if a.isAdminUser(ev.Msg.User) {
+			if a.isAdminUser(ev.Msg.User) || a.isModUser(ev.Msg.User) {
 				a.performMuteAction(ev.Msg.Text)
+				a.performKickAction(ev.Msg.Text, ev.Msg.Channel)
 			} else if a.isMuted(ev.Msg.User) {
 				go a.deleteMsg(ev.Msg.Channel, ev.Msg.Timestamp)
 			}
