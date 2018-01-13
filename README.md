@@ -12,6 +12,13 @@ A Moderator for Slack.
 - Adds the bot to all channels at initialization 
 - Deletes uploaded images and reuploads them to Imgur
 - Mutes an user (type in `ares mute <username>`)
+- Moderators
+
+### Moderators
+
+Ares can make some members as moderators. To add moderators, make sure you have set `MOD_IDS` env variable with the comma separated user ids of the mods, like `U1AQSSBSA, U0CM1JMV5, U0SDDB26B`
+
+Currently, moderators can remove or mute other users.
 
 ## License
 
