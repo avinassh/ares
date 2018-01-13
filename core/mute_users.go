@@ -14,6 +14,10 @@ func (a *Ares) performMuteAction(msg string) {
 	// check if it is either of mute actions and perform
 	// steps accordingly
 	if status, userID := isMuteAction(msg, a.BotUserID); status == true {
+		if a.isAdminUser(userID) {
+			// never mute admins
+			return
+		}
 		a.muteUser(userID)
 	} else if status, userID := isUnMuteAction(msg, a.BotUserID); status == true {
 		a.unMuteUser(userID)

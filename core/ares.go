@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/nlopes/slack"
+	"os"
 )
 
 type Ares struct {
@@ -17,6 +18,8 @@ type Ares struct {
 	ManagedChannels []string
 	// list of userIDs of admins
 	Admins []string
+	// list of userIDs of moderators
+	Moderators []string
 	// maintain a user dict
 	Users map[string]string
 	// Muted users list
@@ -179,6 +182,9 @@ func isImageFile(fileType string) bool {
 func (a *Ares) Run() {
 	api := slack.New(a.SlackBotToken)
 
+	log.Println(a.Moderators)
+	os.Exit(0)
+
 	a.initBot()
 	log.Println("Bot initialized. Starting moderation duty.")
 
@@ -190,7 +196,7 @@ func (a *Ares) Run() {
 
 		case *slack.MessageEvent:
 
-			if a.isAdminUser(ev.Msg.User) {
+			if a.isAdminUser(ev.Msg.User) || a.isModUser(ev.Msg.User) {
 				a.performMuteAction(ev.Msg.Text)
 			} else if a.isMuted(ev.Msg.User) {
 				go a.deleteMsg(ev.Msg.Channel, ev.Msg.Timestamp)
