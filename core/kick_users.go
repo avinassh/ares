@@ -11,8 +11,8 @@ func (a *Ares) performKickAction(msg, channelId string) {
 	// check if it is either of mute actions and perform
 	// steps accordingly
 	if status, userID := isKickAction(msg, a.BotUserID); status == true {
-		if a.isAdminUser(userID) {
-			// never kick admins
+		if a.isAdminUser(userID) || a.BotUserID == userID {
+			// never kick admins and the bot
 			return
 		}
 		a.kickUser(userID, channelId)
