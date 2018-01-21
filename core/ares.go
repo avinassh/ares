@@ -181,6 +181,9 @@ func isImageFile(fileType string) bool {
 func (a *Ares) Run() {
 	api := slack.New(a.SlackBotToken)
 
+	// run clean up duties
+	go a.ClearImages()
+
 	a.initBot()
 	log.Println("Bot initialized. Starting moderation duty.")
 
