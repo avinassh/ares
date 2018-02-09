@@ -26,6 +26,10 @@ Run `./build.sh` to build the docker image and run following:
 
     docker run --name ares --rm --env-file ./envlist ares:latest
 
+If you keep it running in background and restart always:
+
+    docker run --name ares -d --restart always --env-file ./envlist ares:latest
+
 ## License
 
 The mighty MIT license. Please check `LICENSE` for more details.
