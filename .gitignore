@@ -29,3 +29,7 @@ _testmain.go
 
 # ENV variables/secrets
 .envrc
+envlist
+
+# build files
+build/

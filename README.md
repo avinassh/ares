@@ -20,6 +20,12 @@ Ares can make some members as moderators. To add moderators, make sure you have 
 
 Currently, moderators can remove or mute other users.
 
+## Docker
+
+Run `./build.sh` to build the docker image and run following:
+
+    docker run --name ares --rm --env-file ./envlist ares:latest
+
 ## License
 
 The mighty MIT license. Please check `LICENSE` for more details.
