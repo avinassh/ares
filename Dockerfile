@@ -1,3 +1,4 @@
-FROM golang:1.9-stretch
+FROM alpine:3.7
+RUN apk add --no-cache ca-certificates
 ADD build/ /
 ENTRYPOINT ["/ares"]
