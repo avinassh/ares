@@ -154,7 +154,7 @@ func (a *Ares) sendImgToSlack(channel, user, url, commentText string) {
 	}
 }
 
-func (a *Ares) handleFile(file *slack.File, channel string) {
+func (a *Ares) handleFile(file slack.File, channel string) {
 	commentText := file.InitialComment.Comment
 
 	resp := uploadToImgur(file.URLPrivateDownload, a.SlackAppToken, a.ImgurClientID)
@@ -202,10 +202,10 @@ func (a *Ares) Run() {
 				go a.deleteMsg(ev.Msg.Channel, ev.Msg.Timestamp)
 			}
 
-			if ev.SubType == "file_share" {
-				if isImageFile(ev.File.Filetype) {
+			if ev.Upload {
+				if isImageFile(ev.Files[0].Filetype) {
 					// TODO: Use worker pool
-					go a.handleFile(ev.File, ev.Channel)
+					go a.handleFile(ev.Files[0], ev.Channel)
 				}
 			}
 
